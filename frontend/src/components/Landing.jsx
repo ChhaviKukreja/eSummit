@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMenu, FiX, FiUsers, FiTrendingUp, FiBriefcase, FiSearch, FiBook, FiAward, FiLinkedin, FiTwitter, FiInstagram, FiFacebook } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 const Landing = () => {
   return (
@@ -21,6 +22,7 @@ const Landing = () => {
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -81,6 +83,7 @@ const Header = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
             className={`px-4 py-2 rounded-md font-medium transition-colors ${scrolled ? 'text-purple-600 hover:text-purple-700' : 'text-white hover:text-purple-200'}`}
+            onClick={() => navigate('/signup')}
           >
             Sign In
           </motion.button>
@@ -91,6 +94,7 @@ const Header = () => {
             className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 rounded-md text-white font-medium shadow-lg hover:shadow-xl transition-shadow"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/signup')}
           >
             Sign Up
           </motion.button>
@@ -130,10 +134,22 @@ const Header = () => {
                   </a>
                 ))}
                 <div className="flex flex-col space-y-3 pt-4 border-t border-gray-200">
-                  <button className="px-4 py-2 text-purple-600 hover:text-purple-700 font-medium">
+                  <button 
+                    className="px-4 py-2 text-purple-600 hover:text-purple-700 font-medium"
+                    onClick={() => {
+                      setIsOpen(false);
+                      navigate('/signup');
+                    }}
+                  >
                     Sign In
                   </button>
-                  <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 rounded-md text-white font-medium">
+                  <button 
+                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 rounded-md text-white font-medium"
+                    onClick={() => {
+                      setIsOpen(false);
+                      navigate('/signup');
+                    }}
+                  >
                     Sign Up
                   </button>
                 </div>
@@ -148,6 +164,8 @@ const Header = () => {
 
 // Hero Component
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
       {/* Animated background elements */}
@@ -198,6 +216,7 @@ const Hero = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg font-medium text-white shadow-lg hover:shadow-xl transition-shadow"
+                onClick={() => navigate('/signup')}
               >
                 Get Started
               </motion.button>
@@ -598,6 +617,7 @@ const HowItWorks = () => {
 // SignUpSection Component
 const SignUpSection = () => {
   const [activeTab, setActiveTab] = useState('entrepreneur');
+  const navigate = useNavigate();
 
   const tabContent = {
     entrepreneur: {
@@ -726,12 +746,13 @@ const SignUpSection = () => {
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
                       className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-500 text-white font-medium rounded-md shadow-md hover:shadow-lg transition-shadow"
+                      onClick={() => navigate('/signup')}
                     >
                       Sign Up Now
                     </motion.button>
                   </div>
                   <p className="text-sm text-gray-500 mt-4 text-center">
-                    Already have an account? <a href="#" className="text-purple-600 hover:underline">Sign in</a>
+                    Already have an account? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/signup'); }} className="text-purple-600 hover:underline">Sign in</a>
                   </p>
                 </div>
               </div>
