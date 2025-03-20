@@ -20,20 +20,29 @@ const Signup = () => {
   const [attributes, setAttributes] = useState({
     // For mentors/professionals
     yearsOfExperience: '',
-    expertiseField: '',
+    expertise: '',
+    hourlyRate: '',
+    skills: '',
+    interestedTechnologies: '',
+    mentorshipIntent: false,
+    mentorshipTopics: '',
+    pricing: '',
     
     // For aspiring entrepreneurs
     interests: '',
     skillSet: '',
-    educationLevel: ''
+    collaborationPreferences: '',
+    budgetRange: '',
+    availabilityPreferences: '',
+    preferredTopics: '',
   });
-
+  
   // Handle attribute changes
   const handleAttributeChange = (field, value) => {
-    setAttributes(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setAttributes({
+      ...attributes,
+      [field]: value,
+    });
   };
 
   // Handle form submission for sign in
@@ -42,16 +51,19 @@ const Signup = () => {
     console.log('Sign In with:', { email, password });
   };
 
-  // Handle form submission for sign up
+  // Handle sign up logic
   const handleSignUp = () => {
-    // This will be implemented later to send user data to backend
-    console.log('Sign Up with:', { 
-      username, 
-      email, 
-      password, 
-      role, 
-      ...attributes 
+    // Here you would typically send the data to your backend
+    console.log({
+      username,
+      email,
+      password,
+      role,
+      attributes,
     });
+    
+    // Navigate to dashboard with the appropriate role
+    navigate('/dashboard', { state: { userRole: role === 'mentor' ? 'professional' : 'entrepreneur' } });
   };
 
   // Animation variants
@@ -377,10 +389,11 @@ const Signup = () => {
                   onChange={(e) => handleAttributeChange('yearsOfExperience', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
                 >
-                  <option value="">Select years of experience</option>
-                  <option value="0-2">0-2 years</option>
+                  <option value="">Select your experience</option>
+                  <option value="0-1">Less than 1 year</option>
+                  <option value="1-3">1-3 years</option>
                   <option value="3-5">3-5 years</option>
-                  <option value="6-10">6-10 years</option>
+                  <option value="5-10">5-10 years</option>
                   <option value="10+">10+ years</option>
                 </select>
               </div>
@@ -388,12 +401,13 @@ const Signup = () => {
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">Field of Expertise</label>
                 <select
-                  value={attributes.expertiseField}
-                  onChange={(e) => handleAttributeChange('expertiseField', e.target.value)}
+                  value={attributes.expertise}
+                  onChange={(e) => handleAttributeChange('expertise', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
                 >
                   <option value="">Select your expertise</option>
                   <option value="software-development">Software Development</option>
+                  <option value="data-science">Data Science</option>
                   <option value="product-management">Product Management</option>
                   <option value="marketing">Marketing</option>
                   <option value="finance">Finance</option>
@@ -402,6 +416,79 @@ const Signup = () => {
                   <option value="operations">Operations</option>
                   <option value="other">Other</option>
                 </select>
+              </div>
+              
+              {/* Two-column layout for additional fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Hourly Rate</label>
+                  <input
+                    type="number"
+                    value={attributes.hourlyRate}
+                    onChange={(e) => handleAttributeChange('hourlyRate', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                    placeholder="Enter your hourly rate"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Skills</label>
+                  <input
+                    type="text"
+                    value={attributes.skills}
+                    onChange={(e) => handleAttributeChange('skills', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                    placeholder="E.g., JavaScript, React"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Technologies Interested In</label>
+                <input
+                  type="text"
+                  value={attributes.interestedTechnologies}
+                  onChange={(e) => handleAttributeChange('interestedTechnologies', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                  placeholder="E.g., AI, Blockchain, Cloud"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Mentorship Intent</label>
+                  <select
+                    value={attributes.mentorshipIntent}
+                    onChange={(e) => handleAttributeChange('mentorshipIntent', e.target.value === 'true')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                  >
+                    <option value="">Want to mentor?</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Pricing</label>
+                  <input
+                    type="text"
+                    value={attributes.pricing}
+                    onChange={(e) => handleAttributeChange('pricing', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                    placeholder="E.g., $50-100/hour"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Mentorship Topics</label>
+                <input
+                  type="text"
+                  value={attributes.mentorshipTopics}
+                  onChange={(e) => handleAttributeChange('mentorshipTopics', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                  placeholder="E.g., Startup Strategy, Coding"
+                />
               </div>
               
               <motion.button
@@ -475,21 +562,66 @@ const Signup = () => {
                 </select>
               </div>
               
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Education Level</label>
-                <select
-                  value={attributes.educationLevel}
-                  onChange={(e) => handleAttributeChange('educationLevel', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
-                >
-                  <option value="">Select your education level</option>
-                  <option value="high-school">High School</option>
-                  <option value="bachelors">Bachelor's Degree</option>
-                  <option value="masters">Master's Degree</option>
-                  <option value="phd">PhD or Doctorate</option>
-                  <option value="self-taught">Self-taught</option>
-                  <option value="other">Other</option>
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Collaboration Preferences</label>
+                  <select
+                    value={attributes.collaborationPreferences}
+                    onChange={(e) => handleAttributeChange('collaborationPreferences', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                  >
+                    <option value="">Select preference</option>
+                    <option value="co-founder">Co-founder</option>
+                    <option value="freelancer">Freelancer</option>
+                    <option value="employee">Employee</option>
+                    <option value="advisor">Advisor</option>
+                    <option value="multiple">Multiple Options</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Budget Range</label>
+                  <select
+                    value={attributes.budgetRange}
+                    onChange={(e) => handleAttributeChange('budgetRange', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                  >
+                    <option value="">Select budget</option>
+                    <option value="bootstrap">Bootstrapped</option>
+                    <option value="seed">Seed ($10K-$100K)</option>
+                    <option value="angel">Angel ($100K-$500K)</option>
+                    <option value="series-a">Series A ($500K+)</option>
+                    <option value="flexible">Flexible</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Availability</label>
+                  <select
+                    value={attributes.availabilityPreferences}
+                    onChange={(e) => handleAttributeChange('availabilityPreferences', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                  >
+                    <option value="">Select availability</option>
+                    <option value="full-time">Full-time</option>
+                    <option value="part-time">Part-time</option>
+                    <option value="weekends">Weekends Only</option>
+                    <option value="flexible">Flexible Hours</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Preferred Topics</label>
+                  <input
+                    type="text"
+                    value={attributes.preferredTopics}
+                    onChange={(e) => handleAttributeChange('preferredTopics', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                    placeholder="E.g., AI, Web3, SaaS"
+                  />
+                </div>
               </div>
               
               <motion.button

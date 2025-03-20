@@ -47,6 +47,11 @@ const Header = () => {
     { name: 'About', href: '#about' },
   ];
 
+  // For demo purposes - quick access to dashboard
+  const goToDashboard = (role) => {
+    navigate('/dashboard', { state: { userRole: role } });
+  };
+
   return (
     <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 shadow-lg backdrop-blur-md' : 'bg-transparent'}`}>
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -98,6 +103,33 @@ const Header = () => {
           >
             Sign Up
           </motion.button>
+          {/* Demo Dashboard Links */}
+          <div className="relative group">
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className={`px-4 py-2 rounded-md font-medium transition-colors ${scrolled ? 'text-blue-600 hover:text-blue-700' : 'text-white hover:text-blue-200'}`}
+            >
+              Demo
+            </motion.button>
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden z-20 hidden group-hover:block">
+              <div className="py-2">
+                <button
+                  onClick={() => goToDashboard('entrepreneur')}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700"
+                >
+                  Entrepreneur Dashboard
+                </button>
+                <button
+                  onClick={() => goToDashboard('professional')}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700"
+                >
+                  Professional Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Mobile Menu Button */}
@@ -152,6 +184,28 @@ const Header = () => {
                   >
                     Sign Up
                   </button>
+                  {/* Demo Dashboard Links for Mobile */}
+                  <div className="pt-2 border-t border-gray-200">
+                    <p className="text-sm text-gray-500 mb-2">Demo Access:</p>
+                    <button 
+                      className="w-full px-4 py-2 text-left text-blue-600 hover:text-blue-700 font-medium"
+                      onClick={() => {
+                        setIsOpen(false);
+                        goToDashboard('entrepreneur');
+                      }}
+                    >
+                      Entrepreneur Dashboard
+                    </button>
+                    <button 
+                      className="w-full px-4 py-2 text-left text-blue-600 hover:text-blue-700 font-medium"
+                      onClick={() => {
+                        setIsOpen(false);
+                        goToDashboard('professional');
+                      }}
+                    >
+                      Professional Dashboard
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -616,7 +670,7 @@ const HowItWorks = () => {
 
 // SignUpSection Component
 const SignUpSection = () => {
-  const [activeTab, setActiveTab] = useState('entrepreneur');
+  const [activeTab, setActiveTab] = useState('professional');
   const navigate = useNavigate();
 
   const tabContent = {
