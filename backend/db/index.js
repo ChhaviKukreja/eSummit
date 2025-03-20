@@ -1,5 +1,6 @@
 require('dotenv').config();
 const mongoose=require("mongoose");
+const bcrypt = require('bcrypt');   
 
 const mongoUri = process.env.MONGO_URI;
 // Connect to MongoDB
@@ -12,18 +13,24 @@ mongoose.connect(mongoUri, {
 
 // User Schema (Entrepreneurs, Mentors, Experts)
 const userSchema = new mongoose.Schema({
-    name: { type: String, required: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true }, // Store securely with bcrypt
-    role: { type: String, enum: ['entrepreneur', 'mentor', 'expert'], required: true },
+    password: { type: String, required: true },
+    role: { type: String, enum: ['mentor', 'entrepreneur'], required: true },
     industry: { type: String, required: true },
     skills: [String],
     bio: String,
     profilePicture: String,
-    connections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    connections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 }, { timestamps: true });
 
-const User = mongoose.model('User', userSchema);
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
 
 // AI-Powered Matching Recommendations Schema
 const recommendationSchema = new mongoose.Schema({
@@ -31,8 +38,6 @@ const recommendationSchema = new mongoose.Schema({
     recommendedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     createdAt: { type: Date, default: Date.now }
 });
-
-const Recommendation = mongoose.model('Recommendation', recommendationSchema);
 
 // Knowledge Hub Schema (Articles & Resources)
 const knowledgeSchema = new mongoose.Schema({
@@ -42,9 +47,6 @@ const knowledgeSchema = new mongoose.Schema({
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now }
 });
-
-const Knowledge = mongoose.model('Knowledge', knowledgeSchema);
-
 // Messaging Schema (Direct Messages & Group Chats)
 const messageSchema = new mongoose.Schema({
     sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -52,8 +54,6 @@ const messageSchema = new mongoose.Schema({
     message: { type: String, required: true },
     timestamp: { type: Date, default: Date.now }
 });
-
-const Message = mongoose.model('Message', messageSchema);
 
 // Event Schema (Workshops, Webinars, Networking Events)
 const eventSchema = new mongoose.Schema({
@@ -65,6 +65,11 @@ const eventSchema = new mongoose.Schema({
     attendees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 }, { timestamps: true });
 
+
+const User = mongoose.model('User', userSchema);
+const Recommendation = mongoose.model('Recommendation', recommendationSchema);
+const Knowledge = mongoose.model('Knowledge', knowledgeSchema);
+const Message = mongoose.model('Message', messageSchema);
 const Event = mongoose.model('Event', eventSchema);
 
 // Export models
