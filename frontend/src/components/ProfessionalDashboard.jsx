@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiUsers, FiTrendingUp, FiAward, FiUser, FiMenu, FiX, FiHome, FiDollarSign, FiCalendar } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 
 const ProfessionalDashboard = () => {
   const [activeTab, setActiveTab] = useState('mentorship');
@@ -124,6 +127,55 @@ const ProfessionalDashboard = () => {
 // Mentorship Section Component
 const MentorshipSection = () => {
   const [activeView, setActiveView] = useState('apply');
+  const [showAlert, setShowAlert] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmitApplication = (e) => {
+    e.preventDefault();
+    // Here you would typically send the form data to the backend
+    // For now, we'll just show the success alert
+    setShowAlert(true);
+    // Hide the alert after 3 seconds
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 3000);
+  };
+
+  const handleStartSession = async (entrepreneurId) => {
+    try {
+      // Generate a unique meeting ID using UUID
+      const meetingId = uuidv4();
+      
+      // In a real application, you would save this meeting to the database
+      // and notify the entrepreneur that a session has started
+      // For now, we'll just navigate to the meeting
+      
+      // Simulate API call to create a meeting
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          // This would be the actual API call in a real application
+          // await axios.post('http://localhost:5000/mentor/meetings/start', {
+          //   entrepreneurId,
+          //   meetingId
+          // }, {
+          //   headers: { Authorization: `Bearer ${token}` }
+          // });
+          
+          console.log(`Created meeting with ID: ${meetingId} for entrepreneur: ${entrepreneurId}`);
+          
+          // Navigate to the meeting room
+          navigate(`/meeting/${meetingId}`);
+        } catch (error) {
+          console.error('Error creating meeting:', error);
+        }
+      } else {
+        console.error('No authentication token found');
+      }
+    } catch (error) {
+      console.error('Error starting session:', error);
+    }
+  };
 
   return (
     <div>
@@ -132,6 +184,24 @@ const MentorshipSection = () => {
         Share your expertise with aspiring entrepreneurs. Apply to become a mentor and
         create structured mentorship programs to help others succeed.
       </p>
+
+      {/* Success Alert */}
+      {showAlert && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6 flex items-center justify-between" role="alert">
+          <div>
+            <span className="font-bold">Success! </span>
+            <span className="block sm:inline">Form submitted successfully. We'll review your application shortly.</span>
+          </div>
+          <button 
+            onClick={() => setShowAlert(false)}
+            className="text-green-700 hover:text-green-900"
+          >
+            <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+              <path d="M10 8.586L2.929 1.515 1.515 2.929 8.586 10l-7.071 7.071 1.414 1.414L10 11.414l7.071 7.071 1.414-1.414L11.414 10l7.071-7.071-1.414-1.414L10 8.586z"/>
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Toggle between apply and manage views */}
       <div className="bg-white rounded-lg shadow-md p-4 mb-8">
@@ -168,7 +238,7 @@ const MentorshipSection = () => {
             and get back to you within 48 hours.
           </p>
 
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmitApplication}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Expertise</label>
@@ -244,13 +314,102 @@ const MentorshipSection = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">Your Mentorship Programs</h3>
           
-          {/* Empty state */}
-          <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
-            <FiCalendar className="mx-auto text-gray-400 mb-3" size={32} />
-            <h4 className="text-lg font-medium text-gray-700 mb-2">No Mentorship Programs Yet</h4>
-            <p className="text-gray-600 mb-6">
-              You haven't created any mentorship programs yet. Start by creating your first program.
-            </p>
+          {/* Entrepreneurs List */}
+          <div className="mb-6">
+            <h4 className="text-md font-medium text-gray-700 mb-4">Entrepreneurs Under Your Mentorship</h4>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Entrepreneur Card 1 */}
+              <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-4">
+                  <div className="flex items-center mb-3">
+                    <img 
+                      src="https://images.yourstory.com/cs/1/39b69590-716a-11e9-995c-171c030e4eb8/1396731559746268747.jpg?fm=png&auto=format&w=800&blur=500" 
+                      alt="Entrepreneur" 
+                      className="w-12 h-12 rounded-full object-cover mr-3" 
+                    />
+                    <div>
+                      <h5 className="font-medium text-gray-800">Tarun Arora</h5>
+                      <p className="text-sm text-gray-600">AI Startup Founder</p>
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <p className="text-sm text-gray-700">Working on an AI-powered content generation platform for marketing teams.</p>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">Tech</span>
+                    <button 
+                      onClick={() => handleStartSession('john-smith')}
+                      className="bg-white border border-green-600 text-green-600 hover:bg-green-50 px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                    >
+                      Start Session
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Entrepreneur Card 2 */}
+              <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-4">
+                  <div className="flex items-center mb-3">
+                    <img 
+                      src="https://static.startuptalky.com/2022/03/Aparajita-Amar-SHLC-StartupTalky.jpg" 
+                      alt="Entrepreneur" 
+                      className="w-12 h-12 rounded-full object-cover mr-3" 
+                    />
+                    <div>
+                      <h5 className="font-medium text-gray-800">Sakshi Verma</h5>
+                      <p className="text-sm text-gray-600">FinTech Entrepreneur</p>
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <p className="text-sm text-gray-700">Developing a personal finance app for young professionals with automated savings features.</p>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Finance</span>
+                    <button 
+                      onClick={() => handleStartSession('emily-chen')}
+                      className="bg-white border border-green-600 text-green-600 hover:bg-green-50 px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                    >
+                      Start Session
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Entrepreneur Card 3 */}
+              <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-4">
+                  <div className="flex items-center mb-3">
+                    <img 
+                      src="https://www.founderjar.com/wp-content/uploads/2022/09/Bhavish-Agarwal-Best-Young-Indian-Entrepreneur.jpeg" 
+                      alt="Entrepreneur" 
+                      className="w-12 h-12 rounded-full object-cover mr-3" 
+                    />
+                    <div>
+                      <h5 className="font-medium text-gray-800">Bhavish Aggarwal</h5>
+                      <p className="text-sm text-gray-600">E-commerce Founder</p>
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <p className="text-sm text-gray-700">Building a sustainable fashion marketplace connecting eco-friendly brands with conscious consumers.</p>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Retail</span>
+                    <button 
+                      onClick={() => handleStartSession('michael-rodriguez')}
+                      className="bg-white border border-green-600 text-green-600 hover:bg-green-50 px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                    >
+                      Start Session
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Create New Program Button */}
+          <div className="text-center">
             <button className="bg-white border border-purple-600 text-purple-600 hover:bg-purple-50 py-2 px-6 rounded-md font-medium transition-all shadow-sm hover:shadow">
               Create New Program
             </button>
@@ -398,11 +557,16 @@ const ProfileSection = () => {
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex flex-col items-center">
-              <div className="w-32 h-32 bg-gray-200 rounded-full mb-4 flex items-center justify-center text-gray-400">
+            <img 
+              src="https://etimg.etb2bimg.com/photo/112985420.cms" 
+              alt="Profile" 
+              className="w-32 h-32 rounded-full mb-4 border border-gray-300" 
+            />
+              {/* <div className="w-32 h-32 bg-gray-200 rounded-full mb-4 flex items-center justify-center text-gray-400">
                 <FiUser size={48} />
-              </div>
-              <h3 className="font-bold text-xl mb-1">John Doe</h3>
-              <p className="text-gray-600 mb-4">Senior Software Engineer</p>
+              </div> */}
+              <h3 className="font-bold text-xl mb-1">Satish Kumar</h3>
+              <p className="text-gray-600 mb-4">Tech Entrepreneur</p>
               <button className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 transition-colors">
                 Edit Profile
               </button>
@@ -413,11 +577,11 @@ const ProfileSection = () => {
               <div className="space-y-2 text-sm">
                 <p className="flex justify-between">
                   <span className="text-gray-700">Email:</span>
-                  <span>john.doe@example.com</span>
+                  <span>satish.kumar@gmail.com</span>
                 </p>
                 <p className="flex justify-between">
                   <span className="text-gray-700">Location:</span>
-                  <span>San Francisco, CA</span>
+                  <span>Delhi, India</span>
                 </p>
                 <p className="flex justify-between">
                   <span className="text-gray-700">Member Since:</span>
@@ -448,7 +612,7 @@ const ProfileSection = () => {
               <div className="space-y-3">
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm font-medium">JavaScript/TypeScript</span>
+                    <span className="text-sm font-medium">AI/ML</span>
                     <span className="text-sm text-gray-700">95%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
@@ -495,22 +659,22 @@ const ProfileSection = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-purple-50 rounded-lg p-4 text-center">
-                <h4 className="text-2xl font-bold text-purple-700">0</h4>
+                <h4 className="text-2xl font-bold text-purple-700">3</h4>
                 <p className="text-sm text-gray-700">Active Mentees</p>
               </div>
               
               <div className="bg-blue-50 rounded-lg p-4 text-center">
-                <h4 className="text-2xl font-bold text-blue-700">0</h4>
+                <h4 className="text-2xl font-bold text-blue-700">7</h4>
                 <p className="text-sm text-gray-700">Sessions Completed</p>
               </div>
               
               <div className="bg-green-50 rounded-lg p-4 text-center">
-                <h4 className="text-2xl font-bold text-green-700">0</h4>
+                <h4 className="text-2xl font-bold text-green-700">23</h4>
                 <p className="text-sm text-gray-700">Hours Mentored</p>
               </div>
             </div>
             
-            <div className="text-center">
+            {/* <div className="text-center">
               <p className="text-gray-600 mb-4">
                 You haven't started mentoring yet. Apply to become a mentor to start helping entrepreneurs succeed!
               </p>
@@ -520,7 +684,7 @@ const ProfileSection = () => {
               >
                 Apply as Mentor
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

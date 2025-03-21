@@ -34,14 +34,6 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          {/* <Route 
-            path="/mentor-dashboard" 
-            element={
-              <ProtectedRoute>
-                <MentorDashboard />
-              </ProtectedRoute>
-            } 
-          /> */}
           <Route 
             path="/mentor-chat/:mentorId" 
             element={

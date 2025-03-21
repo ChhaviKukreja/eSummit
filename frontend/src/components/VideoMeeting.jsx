@@ -99,7 +99,7 @@ const VideoMeeting = () => {
         // we'll use hardcoded data
         const demoMeeting = {
           _id: 'demo-meeting',
-          title: 'Demo Meeting',
+          title: 'Meeting',
           host: {
             _id: 'host-id',
             firstName: 'You',
@@ -108,8 +108,8 @@ const VideoMeeting = () => {
           },
           participant: {
             _id: meetingId === 'demo-meeting' ? '1' : meetingId,
-            firstName: meetingId === 'demo-meeting' ? 'Alex' : `Mentor ${meetingId}`,
-            lastName: meetingId === 'demo-meeting' ? 'Johnson' : '',
+            firstName: meetingId === 'demo-meeting' ? 'Satish' : `Mentor ${meetingId}`,
+            lastName: meetingId === 'demo-meeting' ? 'Kumar' : '',
             email: 'mentor@example.com'
           },
           startTime: new Date(),
