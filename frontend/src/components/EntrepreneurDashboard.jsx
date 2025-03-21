@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiUsers, FiTrendingUp, FiSearch, FiBook, FiMenu, FiX, FiHome } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 const EntrepreneurDashboard = () => {
   const [activeTab, setActiveTab] = useState('mentors');
@@ -162,6 +163,12 @@ const MentorSection = () => {
     },
   ];
 
+  const navigate = useNavigate();
+
+  const handleBookSession = (mentorId) => {
+    navigate(`/mentor-chat/${mentorId}`);
+  };
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-300 bg-clip-text text-transparent">Find Your Perfect Mentor</h2>
@@ -249,7 +256,10 @@ const MentorSection = () => {
               </div>
               
               <div className="mt-6 flex gap-2">
-                <button className="flex-1 bg-white border border-purple-600 text-purple-600 hover:bg-purple-50 py-2 px-4 rounded-md font-medium transition-all shadow-sm hover:shadow">
+                <button 
+                  className="flex-1 bg-white border border-purple-600 text-purple-600 hover:bg-purple-50 py-2 px-4 rounded-md font-medium transition-all shadow-sm hover:shadow"
+                  onClick={() => handleBookSession(mentor.id)}
+                >
                   Book Session
                 </button>
                 <button className="flex-1 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 py-2 px-4 rounded-md font-medium transition-colors">

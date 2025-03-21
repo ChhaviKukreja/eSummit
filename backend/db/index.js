@@ -67,12 +67,24 @@ const eventSchema = new mongoose.Schema({
     attendees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 }, { timestamps: true });
 
+const meetingSchema = new mongoose.Schema({
+    host: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    participant: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    startTime: { type: Date, required: true },
+    endTime: { type: Date, required: true },
+    status: { type: String, enum: ['scheduled', 'completed', 'cancelled'], default: 'scheduled' },
+    meetingId: { type: String, required: true, unique: true },
+    title: { type: String, required: true },
+    description: { type: String },
+    createdAt: { type: Date, default: Date.now }
+});
+
 
 const User = mongoose.model('User', userSchema);
 const Recommendation = mongoose.model('Recommendation', recommendationSchema);
 const Knowledge = mongoose.model('Knowledge', knowledgeSchema);
 const Message = mongoose.model('Message', messageSchema);
 const Event = mongoose.model('Event', eventSchema);
-
+const Meeting = mongoose.model('Meeting', meetingSchema);
 // Export models
-module.exports = { User, Recommendation, Knowledge, Message, Event, JWT_SECRET };
+module.exports = { User, Recommendation, Knowledge, Message, Event, Meeting, JWT_SECRET };
