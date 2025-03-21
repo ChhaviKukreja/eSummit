@@ -60,27 +60,27 @@ const MentorChat = () => {
         const mentorData = {
           1: {
             _id: 1,
-            firstName: 'Alex',
-            lastName: 'Johnson',
+            firstName: 'Satish',
+            lastName: 'Kumar',
             industry: 'Technology',
             expertise: 'AI & Machine Learning',
-            profilePicture: 'https://randomuser.me/api/portraits/men/32.jpg'
+            profilePicture: 'https://etimg.etb2bimg.com/photo/112985420.cms'
           },
           2: {
             _id: 2,
-            firstName: 'Sarah',
-            lastName: 'Williams',
+            firstName: 'Abhinay',
+            lastName: 'Varsh',
             industry: 'SaaS',
             expertise: 'Product Management',
-            profilePicture: 'https://randomuser.me/api/portraits/women/44.jpg'
+            profilePicture: 'https://tse3.mm.bing.net/th?id=OIP.XVAylWWQ4gKp8try6n4JRQHaEW&pid=Api&P=0&h=180'
           },
           3: {
             _id: 3,
-            firstName: 'Michael',
-            lastName: 'Chen',
+            firstName: 'Neha',
+            lastName: 'Aggarwal',
             industry: 'Venture Capital',
             expertise: 'Fundraising & Growth',
-            profilePicture: 'https://randomuser.me/api/portraits/men/67.jpg'
+            profilePicture: 'https://tse4.mm.bing.net/th?id=OIP.gLl5eo35Jvx67W1ipHPzqAEgDY&pid=Api&P=0&h=180'
           }
         };
 
@@ -151,11 +151,11 @@ const MentorChat = () => {
     };
 
     try {
-      // Add message to local state immediately for better UX
-      setMessages(prev => [...prev, messageData]);
-      
       // Clear input field immediately to prevent duplicate submissions
       setNewMessage('');
+      
+      // Add message to local state immediately for better UX
+      setMessages(prev => [...prev, messageData]);
       
       // Send message to socket
       socket.emit('send_message', messageData);
@@ -174,7 +174,7 @@ const MentorChat = () => {
       // Reset sending flag after a short delay to prevent rapid clicking
       setTimeout(() => {
         setIsSending(false);
-      }, 500);
+      }, 1000); // Increased delay to 1 second to further prevent duplicate sends
     }
   };
 
