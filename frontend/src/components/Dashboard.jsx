@@ -1,16 +1,16 @@
 import EntrepreneurDashboard from './EntrepreneurDashboard';
 import ProfessionalDashboard from './ProfessionalDashboard';
-import { useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-const Dashboard = ({ userRole: defaultRole = 'professional' }) => {
-  // Get userRole from location state if available
-  const location = useLocation();
-  const userRole = location.state?.userRole || defaultRole;
+const Dashboard = () => {
+  // Get user role from auth context
+  const { user } = useAuth();
+  const userRole = user?.role || 'professional';
 
   return (
     <>
       {userRole === 'entrepreneur' && <EntrepreneurDashboard />}
-      {userRole === 'professional' && <ProfessionalDashboard />}
+      {userRole === 'professional' || userRole === 'mentor' && <ProfessionalDashboard />}
     </>
   );
 };

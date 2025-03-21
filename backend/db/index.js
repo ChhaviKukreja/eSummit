@@ -1,8 +1,7 @@
-require('dotenv').config();
 const mongoose=require("mongoose");
-const bcrypt = require('bcrypt');   
+const bcrypt = require('bcrypt');
 
-const mongoUri = process.env.MONGO_URI;
+const mongoUri = "mongodb+srv://Admin:amogh1212@connecthub.lqnyr.mongodb.net/";
 // Connect to MongoDB
 mongoose.connect(mongoUri, {
     useNewUrlParser: true,
@@ -10,6 +9,9 @@ mongoose.connect(mongoUri, {
     connectTimeoutMS: 60000, // 60 seconds
     socketTimeoutMS: 60000,  // 60 seconds
   });
+
+// JWT Secret
+const JWT_SECRET = 'amogh1212';
 
 // User Schema (Entrepreneurs, Mentors, Experts)
 const userSchema = new mongoose.Schema({
@@ -73,4 +75,4 @@ const Message = mongoose.model('Message', messageSchema);
 const Event = mongoose.model('Event', eventSchema);
 
 // Export models
-module.exports = { User, Recommendation, Knowledge, Message, Event };
+module.exports = { User, Recommendation, Knowledge, Message, Event, JWT_SECRET };

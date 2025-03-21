@@ -1,11 +1,12 @@
 const express = require ("express");
-const { Submission, Student, Assignment } = require("../db")
+const { User } = require("../db")
 const userMiddleware = require("../middleware/user");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../config");
+const JWT_SECRET = 'amogh1212';
 const { z } = require("zod");
 const cors = require("cors");
+const bcrypt = require('bcrypt');
 router.use(cors());
 
 const signupSchema = z.object({
@@ -18,7 +19,7 @@ const signupSchema = z.object({
       .regex(/[a-z]/, "Must include a lowercase letter")
       .regex(/[0-9]/, "Must include a number"),
     confirmPassword: z.string().min(8),
-    role: z.enum(["teacher", "student"]),
+    role: z.enum(["mentor", "entrepreneur"]),
   //   agreedToTerms: z.boolean().refine(val => val === true, { message: "You must agree to the Terms of Service" }),
   }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -35,31 +36,26 @@ const signupSchema = z.object({
   router.post("/signup", async function (req, res) {
       try {
           const { firstName, lastName, email, password, role } = signupSchema.parse(req.body);
-  
-         
-          if (role === "mentor") {
-              const existingUser = await Teacher.findOne({ email });
-              // console.log(existingUser);
-              if (existingUser) {
-                  return res.status(400).json({ msg: "User already exists" });
-              }
-              else{
-                  await Teacher.create({ firstName, lastName, email, password, role });
-              }
-          } else {
-              const existingUser = await Student.findOne({ email });
-              if (existingUser) {
-                  return res.status(400).json({ msg: "User already exists" });
-              }
-              else{
-                  await Student.create({ firstName, lastName, email, password, role });
-              }
-              
+
+          const existingUser = await User.findOne({ email });
+          if (existingUser) {
+              return res.status(400).json({ msg: "User already exists" });
           }
-  
+          
+          await User.create({ 
+              firstName, 
+              lastName, 
+              email, 
+              password, 
+              role,
+              industry: req.body.industry || 'Technology',
+              skills: req.body.skills || [],
+              bio: req.body.bio || ''
+          });
+
           const token = jwt.sign({ email, role }, JWT_SECRET);
           res.json({ msg: "User created successfully", token });
-  
+
       } catch (error) {
           res.status(400).json({ error: error.errors || error.message });
       }
@@ -71,19 +67,25 @@ const signupSchema = z.object({
           console.log("inside try");
           const { email, password } = signinSchema.parse(req.body);
           console.log("email and pwd", email, password);
-  
-          // Check if user exists in Teacher or Student collection
-          const user = await Student.findOne({ email, password });
+
+          // Check if user exists
+          const user = await User.findOne({ email });
           console.log("user", user);
-  
+
           if (!user) {
               return res.status(401).json({ msg: "Incorrect email or password" });
           }
-  
+
+          // Compare password
+          const isMatch = await bcrypt.compare(password, user.password);
+          if (!isMatch) {
+              return res.status(401).json({ msg: "Incorrect email or password" });
+          }
+
           // Generate JWT token with user role
           const token = jwt.sign({ email: user.email, role: user.role }, JWT_SECRET);
           console.log("token", token);
-  
+
           res.json({ token, role: user.role });
       } catch (error) {
           res.status(400).json({ error: error.errors || error.message });
@@ -91,6 +93,9 @@ const signupSchema = z.object({
   });
     
     
-  router.get("/auth/check", studentMiddleware, (req, res) => {
+  router.get("/auth/check", userMiddleware, (req, res) => {
       res.status(200).json({ username: req.email }); // Send back the authenticated user's details
     });
+
+// Export the router
+module.exports = router;

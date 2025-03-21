@@ -2,10 +2,14 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiArrowRight, FiArrowLeft, FiBriefcase, FiBook, FiHome } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Signup = () => {
   // Navigation
   const navigate = useNavigate();
+  
+  // Auth context
+  const { login, register, error: authError } = useAuth();
   
   // State to track which screen to show
   const [currentScreen, setCurrentScreen] = useState('auth-choice');
@@ -16,25 +20,24 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('');
   
+  // Form error state
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  
   // Additional attributes based on role
   const [attributes, setAttributes] = useState({
-    // For mentors/professionals
-    yearsOfExperience: '',
-    expertise: '',
-    hourlyRate: '',
+    // Common attributes for both roles
+    industry: 'Technology',
     skills: '',
-    interestedTechnologies: '',
-    mentorshipIntent: false,
-    mentorshipTopics: '',
-    pricing: '',
+    bio: '',
     
-    // For aspiring entrepreneurs
-    interests: '',
-    skillSet: '',
-    collaborationPreferences: '',
-    budgetRange: '',
-    availabilityPreferences: '',
-    preferredTopics: '',
+    // For mentors
+    expertise: '',
+    yearsOfExperience: '',
+    
+    // For entrepreneurs
+    startupIdea: '',
+    fundingStage: '',
   });
   
   // Handle attribute changes
@@ -46,24 +49,129 @@ const Signup = () => {
   };
 
   // Handle form submission for sign in
-  const handleSignIn = () => {
-    // This will be implemented later to fetch JWT token
-    console.log('Sign In with:', { email, password });
+  const handleSignIn = async () => {
+    setError('');
+    setLoading(true);
+    
+    try {
+      if (!email || !password) {
+        throw new Error('Please fill in all required fields');
+      }
+      
+      await login({ email, password });
+      // If successful, the auth context will redirect to dashboard
+    } catch (err) {
+      // Handle different types of error responses
+      if (err.error && typeof err.error === 'object') {
+        // Handle validation errors from backend
+        const errorMessages = Object.values(err.error).join(', ');
+        setError(errorMessages || 'Sign in failed. Please check your credentials.');
+      } else if (err.msg) {
+        // Handle custom error messages from backend
+        setError(err.msg);
+      } else {
+        // Handle other errors
+        setError(err.message || 'Sign in failed. Please try again.');
+      }
+      console.error('Signin error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle sign up logic
-  const handleSignUp = () => {
-    // Here you would typically send the data to your backend
-    console.log({
-      username,
-      email,
-      password,
-      role,
-      attributes,
-    });
+  const handleSignUp = async () => {
+    setError('');
+    setLoading(true);
     
-    // Navigate to dashboard with the appropriate role
-    navigate('/dashboard', { state: { userRole: role === 'mentor' ? 'professional' : 'entrepreneur' } });
+    try {
+      if (!username || !email || !password || !role) {
+        throw new Error('Please fill in all required fields');
+      }
+      
+      // Validate password meets requirements
+      const passwordRegex = {
+        uppercase: /[A-Z]/,
+        lowercase: /[a-z]/,
+        number: /[0-9]/
+      };
+      
+      if (password.length < 8) {
+        throw new Error('Password must be at least 8 characters');
+      }
+      
+      if (!passwordRegex.uppercase.test(password)) {
+        throw new Error('Password must include at least one uppercase letter');
+      }
+      
+      if (!passwordRegex.lowercase.test(password)) {
+        throw new Error('Password must include at least one lowercase letter');
+      }
+      
+      if (!passwordRegex.number.test(password)) {
+        throw new Error('Password must include at least one number');
+      }
+      
+      // Split name properly
+      const nameParts = username.trim().split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : firstName; // Use firstName as lastName if not provided
+      
+      // Validate name lengths
+      if (firstName.length < 2) {
+        throw new Error('First name must have at least 2 characters');
+      }
+      
+      if (lastName.length < 2) {
+        throw new Error('Last name must have at least 2 characters');
+      }
+      
+      // Prepare skills array from comma-separated string if needed
+      let skillsArray = attributes.skills;
+      if (typeof attributes.skills === 'string') {
+        skillsArray = attributes.skills.split(',').map(skill => skill.trim()).filter(Boolean);
+      }
+      
+      const userData = {
+        firstName,
+        lastName,
+        email,
+        password,
+        confirmPassword: password,
+        role: role === 'mentor' ? 'mentor' : 'entrepreneur',
+        industry: attributes.industry || 'Technology',
+        skills: skillsArray,
+        bio: attributes.bio || '',
+      };
+      
+      // Add role-specific fields
+      if (role === 'mentor') {
+        userData.expertise = attributes.expertise;
+        userData.yearsOfExperience = attributes.yearsOfExperience;
+      } else {
+        userData.startupIdea = attributes.startupIdea;
+        userData.fundingStage = attributes.fundingStage;
+      }
+      
+      await register(userData);
+      // If successful, the auth context will redirect to dashboard
+    } catch (err) {
+      // Handle different types of error responses
+      if (err.error && typeof err.error === 'object') {
+        // Handle Zod validation errors from backend
+        const errorMessages = Object.values(err.error).join(', ');
+        setError(errorMessages || 'Sign up failed. Please check your information.');
+      } else if (err.msg) {
+        // Handle custom error messages from backend
+        setError(err.msg);
+      } else {
+        // Handle other errors
+        setError(err.message || 'Sign up failed. Please try again.');
+      }
+      console.error('Signup error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Animation variants
@@ -155,6 +263,16 @@ const Signup = () => {
               </h2>
             </motion.div>
             
+            {(error || authError) && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg"
+              >
+                {error || authError}
+              </motion.div>
+            )}
+            
             <motion.div variants={itemVariants} className="space-y-4">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">Email</label>
@@ -192,9 +310,10 @@ const Signup = () => {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSignIn}
-                className="w-full py-3 px-6 mt-6 bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg shadow-md text-white font-medium hover:shadow-lg transition-shadow"
+                disabled={loading}
+                className={`w-full py-3 px-6 mt-6 bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg shadow-md text-white font-medium hover:shadow-lg transition-shadow ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
-                Sign In
+                {loading ? 'Signing In...' : 'Sign In'}
               </motion.button>
             </motion.div>
           </motion.div>
@@ -222,6 +341,16 @@ const Signup = () => {
                 Create Account
               </h2>
             </motion.div>
+            
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg"
+              >
+                {error}
+              </motion.div>
+            )}
             
             <motion.div variants={itemVariants} className="space-y-4">
               <div className="space-y-2">
@@ -383,23 +512,7 @@ const Signup = () => {
             
             <motion.div variants={itemVariants} className="space-y-4">
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Years of Experience</label>
-                <select
-                  value={attributes.yearsOfExperience}
-                  onChange={(e) => handleAttributeChange('yearsOfExperience', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
-                >
-                  <option value="">Select your experience</option>
-                  <option value="0-1">Less than 1 year</option>
-                  <option value="1-3">1-3 years</option>
-                  <option value="3-5">3-5 years</option>
-                  <option value="5-10">5-10 years</option>
-                  <option value="10+">10+ years</option>
-                </select>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Field of Expertise</label>
+                <label className="block text-sm font-medium text-gray-700">Expertise</label>
                 <select
                   value={attributes.expertise}
                   onChange={(e) => handleAttributeChange('expertise', e.target.value)}
@@ -418,76 +531,59 @@ const Signup = () => {
                 </select>
               </div>
               
-              {/* Two-column layout for additional fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Hourly Rate</label>
-                  <input
-                    type="number"
-                    value={attributes.hourlyRate}
-                    onChange={(e) => handleAttributeChange('hourlyRate', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
-                    placeholder="Enter your hourly rate"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Skills</label>
-                  <input
-                    type="text"
-                    value={attributes.skills}
-                    onChange={(e) => handleAttributeChange('skills', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
-                    placeholder="E.g., JavaScript, React"
-                  />
-                </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Years of Experience</label>
+                <select
+                  value={attributes.yearsOfExperience}
+                  onChange={(e) => handleAttributeChange('yearsOfExperience', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                >
+                  <option value="">Select your experience</option>
+                  <option value="0-1">Less than 1 year</option>
+                  <option value="1-3">1-3 years</option>
+                  <option value="3-5">3-5 years</option>
+                  <option value="5-10">5-10 years</option>
+                  <option value="10+">10+ years</option>
+                </select>
+              </div>
+              
+              {/* Common fields for both roles */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Industry</label>
+                <select
+                  value={attributes.industry}
+                  onChange={(e) => handleAttributeChange('industry', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                >
+                  <option value="Technology">Technology</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Healthcare">Healthcare</option>
+                  <option value="Education">Education</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Manufacturing">Manufacturing</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
               
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Technologies Interested In</label>
+                <label className="block text-sm font-medium text-gray-700">Skills (comma-separated)</label>
                 <input
                   type="text"
-                  value={attributes.interestedTechnologies}
-                  onChange={(e) => handleAttributeChange('interestedTechnologies', e.target.value)}
+                  value={attributes.skills}
+                  onChange={(e) => handleAttributeChange('skills', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
-                  placeholder="E.g., AI, Blockchain, Cloud"
+                  placeholder="E.g., JavaScript, React, Node.js"
                 />
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Mentorship Intent</label>
-                  <select
-                    value={attributes.mentorshipIntent}
-                    onChange={(e) => handleAttributeChange('mentorshipIntent', e.target.value === 'true')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
-                  >
-                    <option value="">Want to mentor?</option>
-                    <option value="true">Yes</option>
-                    <option value="false">No</option>
-                  </select>
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Pricing</label>
-                  <input
-                    type="text"
-                    value={attributes.pricing}
-                    onChange={(e) => handleAttributeChange('pricing', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
-                    placeholder="E.g., $50-100/hour"
-                  />
-                </div>
-              </div>
-              
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Mentorship Topics</label>
-                <input
-                  type="text"
-                  value={attributes.mentorshipTopics}
-                  onChange={(e) => handleAttributeChange('mentorshipTopics', e.target.value)}
+                <label className="block text-sm font-medium text-gray-700">Bio</label>
+                <textarea
+                  value={attributes.bio}
+                  onChange={(e) => handleAttributeChange('bio', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
-                  placeholder="E.g., Startup Strategy, Coding"
+                  placeholder="Tell us about yourself"
+                  rows="3"
                 />
               </div>
               
@@ -528,100 +624,70 @@ const Signup = () => {
             
             <motion.div variants={itemVariants} className="space-y-4">
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Areas of Interest</label>
+                <label className="block text-sm font-medium text-gray-700">Startup Idea</label>
+                <input
+                  type="text"
+                  value={attributes.startupIdea}
+                  onChange={(e) => handleAttributeChange('startupIdea', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                  placeholder="Enter your startup idea"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Funding Stage</label>
                 <select
-                  value={attributes.interests}
-                  onChange={(e) => handleAttributeChange('interests', e.target.value)}
+                  value={attributes.fundingStage}
+                  onChange={(e) => handleAttributeChange('fundingStage', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
                 >
-                  <option value="">Select your interest</option>
-                  <option value="tech">Technology</option>
-                  <option value="health">Health & Wellness</option>
-                  <option value="finance">Finance & Fintech</option>
-                  <option value="education">Education</option>
-                  <option value="ecommerce">E-commerce</option>
-                  <option value="sustainability">Sustainability</option>
-                  <option value="other">Other</option>
+                  <option value="">Select funding stage</option>
+                  <option value="bootstrap">Bootstrapped</option>
+                  <option value="seed">Seed ($10K-$100K)</option>
+                  <option value="angel">Angel ($100K-$500K)</option>
+                  <option value="series-a">Series A ($500K+)</option>
+                  <option value="flexible">Flexible</option>
+                </select>
+              </div>
+              
+              {/* Common fields for both roles */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Industry</label>
+                <select
+                  value={attributes.industry}
+                  onChange={(e) => handleAttributeChange('industry', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                >
+                  <option value="Technology">Technology</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Healthcare">Healthcare</option>
+                  <option value="Education">Education</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Manufacturing">Manufacturing</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
               
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Skill Set</label>
-                <select
-                  value={attributes.skillSet}
-                  onChange={(e) => handleAttributeChange('skillSet', e.target.value)}
+                <label className="block text-sm font-medium text-gray-700">Skills (comma-separated)</label>
+                <input
+                  type="text"
+                  value={attributes.skills}
+                  onChange={(e) => handleAttributeChange('skills', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
-                >
-                  <option value="">Select your primary skill</option>
-                  <option value="technical">Technical (Coding, Engineering)</option>
-                  <option value="design">Design (UI/UX, Graphics)</option>
-                  <option value="business">Business (Strategy, Operations)</option>
-                  <option value="marketing">Marketing & Sales</option>
-                  <option value="content">Content Creation</option>
-                  <option value="other">Other</option>
-                </select>
+                  placeholder="E.g., JavaScript, React, Node.js"
+                />
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Collaboration Preferences</label>
-                  <select
-                    value={attributes.collaborationPreferences}
-                    onChange={(e) => handleAttributeChange('collaborationPreferences', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
-                  >
-                    <option value="">Select preference</option>
-                    <option value="co-founder">Co-founder</option>
-                    <option value="freelancer">Freelancer</option>
-                    <option value="employee">Employee</option>
-                    <option value="advisor">Advisor</option>
-                    <option value="multiple">Multiple Options</option>
-                  </select>
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Budget Range</label>
-                  <select
-                    value={attributes.budgetRange}
-                    onChange={(e) => handleAttributeChange('budgetRange', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
-                  >
-                    <option value="">Select budget</option>
-                    <option value="bootstrap">Bootstrapped</option>
-                    <option value="seed">Seed ($10K-$100K)</option>
-                    <option value="angel">Angel ($100K-$500K)</option>
-                    <option value="series-a">Series A ($500K+)</option>
-                    <option value="flexible">Flexible</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Availability</label>
-                  <select
-                    value={attributes.availabilityPreferences}
-                    onChange={(e) => handleAttributeChange('availabilityPreferences', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
-                  >
-                    <option value="">Select availability</option>
-                    <option value="full-time">Full-time</option>
-                    <option value="part-time">Part-time</option>
-                    <option value="weekends">Weekends Only</option>
-                    <option value="flexible">Flexible Hours</option>
-                  </select>
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Preferred Topics</label>
-                  <input
-                    type="text"
-                    value={attributes.preferredTopics}
-                    onChange={(e) => handleAttributeChange('preferredTopics', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
-                    placeholder="E.g., AI, Web3, SaaS"
-                  />
-                </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Bio</label>
+                <textarea
+                  value={attributes.bio}
+                  onChange={(e) => handleAttributeChange('bio', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-colors"
+                  placeholder="Tell us about yourself"
+                  rows="3"
+                />
               </div>
               
               <motion.button

@@ -1,6 +1,6 @@
 const { User }=require("../db");
 const jwt=require("jsonwebtoken");
-const { JWT_SECRET }=require("../config");
+const JWT_SECRET = 'amogh1212';
 
 function userMiddleware(req,res,next){
     try{
