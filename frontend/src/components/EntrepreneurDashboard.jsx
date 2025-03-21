@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext, createContext } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import io from 'socket.io-client';
 import { FiUsers, FiUserPlus, FiUser, FiTrendingUp, FiBook, FiMenu } from 'react-icons/fi';
 
