@@ -57,6 +57,20 @@ const messageSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now }
 });
 
+// Chat Schema for real-time communication between entrepreneurs and mentors
+const chatSchema = new mongoose.Schema({
+    entrepreneurId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    mentorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    messages: [{
+        sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+        content: { type: String, required: true },
+        timestamp: { type: Date, default: Date.now },
+        read: { type: Boolean, default: false }
+    }],
+    status: { type: String, enum: ['active', 'archived'], default: 'active' },
+    lastActivity: { type: Date, default: Date.now }
+}, { timestamps: true });
+
 // Event Schema (Workshops, Webinars, Networking Events)
 const eventSchema = new mongoose.Schema({
     title: { type: String, required: true },
@@ -79,12 +93,12 @@ const meetingSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-
 const User = mongoose.model('User', userSchema);
 const Recommendation = mongoose.model('Recommendation', recommendationSchema);
 const Knowledge = mongoose.model('Knowledge', knowledgeSchema);
 const Message = mongoose.model('Message', messageSchema);
 const Event = mongoose.model('Event', eventSchema);
 const Meeting = mongoose.model('Meeting', meetingSchema);
+const Chat = mongoose.model('Chat', chatSchema);
 // Export models
-module.exports = { User, Recommendation, Knowledge, Message, Event, Meeting, JWT_SECRET };
+module.exports = { User, Recommendation, Knowledge, Message, Event, Meeting, Chat, JWT_SECRET };

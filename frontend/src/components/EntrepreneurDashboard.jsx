@@ -261,88 +261,106 @@ const MentorSection = () => {
     <div>
       <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-300 bg-clip-text text-transparent">Find Your Perfect Mentor</h2>
       <p className="text-gray-300 mb-8">
-        Connect with industry experts who can guide you through your entrepreneurial journey.
-        Get personalized advice, feedback, and support from experienced professionals.
+        Connect with experienced mentors who can guide you through your entrepreneurial journey.
+        Book sessions, get personalized advice, and accelerate your growth.
       </p>
 
-      {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      {/* Filters */}
+      <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+        <div className="flex flex-wrap gap-4">
+          <div className="w-full md:w-auto">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Expertise</label>
+            <select className="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500 outline-none bg-white text-gray-800">
+              <option value="">All Expertise</option>
+              <option value="tech">Technology</option>
+              <option value="business">Business Strategy</option>
+              <option value="marketing">Marketing</option>
+              <option value="fundraising">Fundraising</option>
+            </select>
+          </div>
+          <div className="w-full md:w-auto">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
+            <select className="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500 outline-none bg-white text-gray-800">
+              <option value="">Any Price</option>
+              <option value="low">$50-$100/hour</option>
+              <option value="medium">$100-$150/hour</option>
+              <option value="high">$150+/hour</option>
+            </select>
+          </div>
+          <div className="w-full md:w-auto">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+            <select className="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500 outline-none bg-white text-gray-800">
+              <option value="">Any Rating</option>
+              <option value="4.5">4.5+ Stars</option>
+              <option value="4">4+ Stars</option>
+              <option value="3.5">3.5+ Stars</option>
+            </select>
+          </div>
+          <div className="w-full md:w-auto flex items-end">
+            <button className="w-full md:w-auto px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
+              Apply Filters
+            </button>
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mentors.map((mentor) => (
-            <div key={mentor.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="relative">
-                <div className="h-32 bg-gradient-to-r from-purple-500 to-blue-500"></div>
-                <div className="absolute -bottom-12 left-6">
-                  <img 
-                    src={mentor.image} 
-                    alt={mentor.name}
-                    className="w-24 h-24 rounded-full border-4 border-white object-cover"
-                  />
+      </div>
+
+
+      {/* Mentor Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {mentors.map((mentor) => (
+          <div key={mentor.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
+            <div className="p-6">
+              <div className="flex items-start">
+                <img 
+                  src={mentor.image} 
+                  alt={mentor.name} 
+                  className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-purple-100" 
+                />
+                <div>
+                  <h3 className="font-bold text-lg text-gray-800">{mentor.name}</h3>
+                  <p className="text-gray-600">{mentor.role}</p>
+                  <div className="flex items-center mt-1">
+                    <span className="text-yellow-500 flex items-center">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                      </svg>
+                      {mentor.rating}
+                    </span>
+                    <span className="text-gray-500 text-xs ml-1">({mentor.reviews} reviews)</span>
+                  </div>
                 </div>
               </div>
               
-              <div className="pt-14 px-6 pb-6">
-                <h3 className="font-bold text-xl text-gray-800">{mentor.name}</h3>
-                <p className="text-gray-600 mb-2">{mentor.role}</p>
-                
-                <div className="flex items-center mb-4">
-                  <div className="flex text-yellow-400">
-                    {[...Array(5)].map((_, i) => (
-                      <svg key={i} className={`w-4 h-4 ${i < Math.floor(mentor.rating) ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                      </svg>
-                    ))}
-                  </div>
-                  <span className="text-gray-600 text-sm ml-2">{mentor.rating} ({mentor.reviews} reviews)</span>
+              <div className="mt-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 font-medium">{mentor.expertise}</span>
+                  <span className="text-purple-600 font-bold">{mentor.price}</span>
                 </div>
-                
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Expertise:</span>
-                    <span className="text-gray-900 font-medium">{mentor.expertise}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Experience:</span>
-                    <span className="text-gray-900 font-medium">{mentor.experience}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Rate:</span>
-                    <span className="text-gray-900 font-medium">{mentor.price}</span>
-                  </div>
-                </div>
+                <p className="text-gray-500 text-sm mt-1">{mentor.experience} experience</p>
+              </div>
               
-                <div className="mt-6 flex gap-2">
-                  {activeSessions && activeSessions[mentor.id] ? (
-                    <button 
-                      className="flex-1 bg-green-500 text-white hover:bg-green-600 py-2 px-4 rounded-md font-medium transition-all shadow-sm hover:shadow animate-pulse"
-                      onClick={() => handleJoinSession(activeSessions[mentor.id])}
-                    >
-                      Join Session
-                    </button>
-                  ) : (
-                    <button 
-                      className="flex-1 bg-white border border-purple-600 text-purple-600 hover:bg-purple-50 py-2 px-4 rounded-md font-medium transition-all shadow-sm hover:shadow"
-                      onClick={() => handleBookSession(mentor.id)}
-                    >
-                      Book Session
-                    </button>
-                  )}
-                  <button 
-                    className="flex-1 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 py-2 px-4 rounded-md font-medium transition-colors"
-                    onClick={() => handleViewProfile(mentor)}
-                  >
-                    View Profile
-                  </button>
-                </div>
+              <div className="mt-6 flex gap-2">
+                <button 
+                  className={`flex-1 py-2 px-4 rounded-md font-medium transition-all shadow-sm hover:shadow ${
+                    activeSessions[mentor.id] ? 
+                    'bg-green-600 text-white hover:bg-green-700 animate-pulse' : 
+                    'bg-purple-600 text-white hover:bg-purple-700'
+                  }`}
+                  onClick={() => handleBookSession(mentor.id)}
+                >
+                  {activeSessions[mentor.id] ? 'Join Now' : 'Book Session'}
+                </button>
+                <button 
+                  className="flex-1 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 py-2 px-4 rounded-md font-medium transition-colors"
+                  onClick={() => openProfileModal(mentor)}
+                >
+                  View Profile
+                </button>
               </div>
             </div>
-          ))}
+          </div>
+        ))}
         </div>
-      )}
-
       {/* Mentor Profile Modal */}
       {showProfileModal && selectedMentor && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -511,7 +529,7 @@ const CoFounderSection = () => {
             skills: ['Digital Marketing', 'Content Strategy', 'SEO', 'Social Media'],
             lookingFor: 'Technical Co-founder',
             idea: 'An AI-powered content creation tool for small businesses.',
-            image: 'https://tse1.mm.bing.net/th?id=OIP.ULMwkh_y_MtJzIXV0CjvJwHaLH&pid=Api&P=0&h=180',
+            image: 'https://www.founderjar.com/wp-content/uploads/2022/09/7.-Divya-Gandotra-Tandon.jpeg',
             location: 'Mumbai, India',
             experience: '7 years',
             education: 'MBA from XLRI Jamshedpur',
@@ -525,7 +543,7 @@ const CoFounderSection = () => {
             skills: ['Product Strategy', 'UX Design', 'Data Analysis', 'Agile'],
             lookingFor: 'Technical & Marketing Co-founders',
             idea: 'A healthcare app that connects patients with doctors for virtual consultations.',
-            image: 'https://tse2.mm.bing.net/th?id=OIP.g-zs2Fd5uHJmYFRxlLFdFgHaLH&pid=Api&P=0&h=180',
+            image: 'https://www.founderjar.com/wp-content/uploads/2022/09/5.-Trishneet-Arora.jpeg',
             location: 'Delhi, India',
             experience: '6 years',
             education: 'MBA from ISB Hyderabad',
@@ -539,7 +557,7 @@ const CoFounderSection = () => {
             skills: ['UI Design', 'User Research', 'Prototyping', 'Figma'],
             lookingFor: 'Technical Co-founder',
             idea: 'A platform for independent designers to showcase and sell their work.',
-            image: 'https://tse1.mm.bing.net/th?id=OIP.q1aw2wd88rFUtRtP9fFx_QHaLH&pid=Api&P=0&h=180',
+            image: 'https://static.startuptalky.com/2022/03/Shradha-Sharma-YourStory-StartupTalky.jpg',
             location: 'Pune, India',
             experience: '4 years',
             education: 'BDes from NID Ahmedabad',
